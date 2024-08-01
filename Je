@@ -1,0 +1,173 @@
+-- Criação da ScreenGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+screenGui.Name = "SpeedControlGui"
+screenGui.ResetOnSpawn = false  -- Não redefinir ao respawnar
+
+-- Criação do Frame
+local mainFrame = Instance.new("Frame")
+mainFrame.Parent = screenGui
+mainFrame.Size = UDim2.new(0, 200, 0, 200) -- Aumenta a altura para o estado da velocidade
+mainFrame.Position = UDim2.new(0.5, -100, 0.5, -100)
+mainFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+mainFrame.BorderSizePixel = 0
+mainFrame.Draggable = true
+mainFrame.Active = true -- Necessário para o arrasto
+
+-- Criação do Título
+local title = Instance.new("TextLabel")
+title.Parent = mainFrame
+title.Size = UDim2.new(1, -40, 0, 30)  -- Ajusta a largura para acomodar o botão
+title.Position = UDim2.new(0, 0, 0, 0)
+title.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+title.Text = "Controle de Velocidade"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.Font = Enum.Font.SourceSansBold
+title.TextSize = 18
+title.BorderSizePixel = 0
+
+-- Criação do TextLabel para o estado da velocidade
+local stateFrame = Instance.new("Frame")
+stateFrame.Parent = mainFrame
+stateFrame.Size = UDim2.new(1, -20, 0, 30)
+stateFrame.Position = UDim2.new(0, 10, 0, 30)
+stateFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+stateFrame.BorderSizePixel = 0
+
+local stateIndicator = Instance.new("Frame")
+stateIndicator.Parent = stateFrame
+stateIndicator.Size = UDim2.new(0, 20, 0, 20)
+stateIndicator.Position = UDim2.new(0, 0, 0, 5)
+stateIndicator.BackgroundColor3 = Color3.fromRGB(255, 0, 0) -- Inicialmente vermelho
+stateIndicator.BorderSizePixel = 0
+stateIndicator.ClipsDescendants = true
+
+local stateLabel = Instance.new("TextLabel")
+stateLabel.Parent = stateFrame
+stateLabel.Size = UDim2.new(1, -30, 1, 0)
+stateLabel.Position = UDim2.new(0, 30, 0, 0)
+stateLabel.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+stateLabel.Text = "Velocidade: Desativada"
+stateLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+stateLabel.Font = Enum.Font.SourceSans
+stateLabel.TextSize = 14
+stateLabel.BorderSizePixel = 0
+
+-- Criação da TextBox para velocidade
+local speedTextBox = Instance.new("TextBox")
+speedTextBox.Parent = mainFrame
+speedTextBox.Size = UDim2.new(1, -20, 0, 30)
+speedTextBox.Position = UDim2.new(0, 10, 0, 70)
+speedTextBox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+speedTextBox.Text = ""
+speedTextBox.PlaceholderText = "Digite a velocidade"
+speedTextBox.Font = Enum.Font.SourceSans
+speedTextBox.TextSize = 14
+speedTextBox.TextColor3 = Color3.fromRGB(0, 0, 0)
+
+-- Criação do botão para definir a velocidade
+local setSpeedButton = Instance.new("TextButton")
+setSpeedButton.Parent = mainFrame
+setSpeedButton.Size = UDim2.new(1, -20, 0, 30)
+setSpeedButton.Position = UDim2.new(0, 10, 0, 110)
+setSpeedButton.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+setSpeedButton.Text = "Definir Velocidade"
+setSpeedButton.Font = Enum.Font.SourceSansBold
+setSpeedButton.TextSize = 18
+setSpeedButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+-- Criação do botão para resetar a velocidade
+local resetSpeedButton = Instance.new("TextButton")
+resetSpeedButton.Parent = mainFrame
+resetSpeedButton.Size = UDim2.new(1, -20, 0, 30)
+resetSpeedButton.Position = UDim2.new(0, 10, 0, 150)
+resetSpeedButton.BackgroundColor3 = Color3.fromRGB(255, 70, 70)
+resetSpeedButton.Text = "Velocidade Padrão"
+resetSpeedButton.Font = Enum.Font.SourceSansBold
+resetSpeedButton.TextSize = 18
+resetSpeedButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+-- Criação do botão de fechar
+local closeButton = Instance.new("TextButton")
+closeButton.Parent = mainFrame
+closeButton.Size = UDim2.new(0, 30, 0, 30)
+closeButton.Position = UDim2.new(1, -30, 0, 0) -- Posição ajustada para o canto superior direito
+closeButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+closeButton.Text = "X"
+closeButton.Font = Enum.Font.SourceSansBold
+closeButton.TextSize = 18
+closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeButton.BorderSizePixel = 0
+
+-- Variável para armazenar a velocidade definida
+local storedSpeed = 16 -- Velocidade padrão inicial
+
+-- Função para atualizar o estado da velocidade
+local function updateSpeedState()
+    if storedSpeed == 16 then
+        stateLabel.Text = "Velocidade: Desativada"
+        stateIndicator.BackgroundColor3 = Color3.fromRGB(255, 0, 0) -- Vermelho
+    else
+        stateLabel.Text = "Velocidade: Ativada (" .. storedSpeed .. ")"
+        stateIndicator.BackgroundColor3 = Color3.fromRGB(0, 255, 0) -- Verde
+    end
+end
+
+-- Função para definir a velocidade do jogador
+local function setSpeed()
+    local player = game.Players.LocalPlayer
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    local speed = tonumber(speedTextBox.Text)
+
+    if humanoid and speed then
+        humanoid.WalkSpeed = speed
+        storedSpeed = speed -- Armazena a velocidade definida
+        updateSpeedState() -- Atualiza o estado da velocidade
+    end
+end
+
+-- Função para redefinir a velocidade para o padrão (16)
+local function resetSpeed()
+    local player = game.Players.LocalPlayer
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+
+    if humanoid then
+        humanoid.WalkSpeed = 16
+        storedSpeed = 16 -- Redefine a velocidade armazenada
+        updateSpeedState() -- Atualiza o estado da velocidade
+    end
+end
+
+-- Função para aplicar a velocidade armazenada ao Humanoid
+local function applyStoredSpeed(character)
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    if humanoid then
+        humanoid.WalkSpeed = storedSpeed
+        updateSpeedState() -- Atualiza o estado da velocidade
+    end
+end
+
+-- Função para fechar o GUI
+local function closeGui()
+    screenGui:Destroy()
+end
+
+-- Conectar os botões às funções
+setSpeedButton.MouseButton1Click:Connect(setSpeed)
+resetSpeedButton.MouseButton1Click:Connect(resetSpeed)
+closeButton.MouseButton1Click:Connect(closeGui)
+
+-- Conectar a aplicação da velocidade armazenada ao evento CharacterAdded
+game.Players.LocalPlayer.CharacterAdded:Connect(function(character)
+    -- Esperar o Humanoid ser adicionado ao personagem
+    character:WaitForChild("Humanoid")
+    -- Aplicar a velocidade armazenada
+    applyStoredSpeed(character)
+end)
+
+-- Aplicar a velocidade armazenada ao personagem atual (caso haja um ao iniciar o script)
+if game.Players.LocalPlayer.Character then
+    applyStoredSpeed(game.Players.LocalPlayer.Character)
+end
